@@ -1,42 +1,55 @@
-import { Card, CardContent, Grid, Typography } from '@mui/material'
-
-const stats = [
-  { label: 'Total Templates', value: '12' },
-  { label: 'Total Documents', value: '248' },
-  { label: 'Processed Documents', value: '221' },
-  { label: 'Pending Review', value: '27' },
-]
+import { Box, Button, Card, CardContent, Grid, Stack, Typography } from '@mui/material'
+import { ArrowForward, Description, FolderOpen } from '@mui/icons-material'
 
 export default function DashboardPage() {
   return (
-    <div>
-      <Typography variant="h4" sx={{ mb: 3, fontWeight: 700 }}>
-        Dashboard
+    <Box sx={{ maxWidth: 1100, mx: 'auto' }}>
+      <Typography variant="overline" color="primary.main" sx={{ fontWeight: 700, letterSpacing: 1.5 }}>
+        Overview
+      </Typography>
+      <Typography variant="h4" sx={{ fontWeight: 800, mb: 3 }}>
+        Document form workflow
       </Typography>
 
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        {stats.map((stat) => (
-          <Grid item xs={12} sm={6} md={3} key={stat.label}>
-            <Card>
-              <CardContent>
-                <Typography variant="body2" color="text.secondary">{stat.label}</Typography>
-                <Typography variant="h4" sx={{ mt: 1, fontWeight: 700 }}>
-                  {stat.value}
+      <Grid container spacing={3}>
+        <Grid size={{ xs: 12, md: 6 }}>
+          <Card>
+            <CardContent sx={{ p: 3 }}>
+              <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 2 }}>
+                <FolderOpen color="primary" />
+                <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                  Empty forms
                 </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
+              </Stack>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                Upload a blank form and define the locations of fields like Name, DOB, Address, and Phone.
+              </Typography>
+              <Button variant="contained" endIcon={<ArrowForward />}>
+                Upload Empty Form
+              </Button>
+            </CardContent>
+          </Card>
+        </Grid>
 
-      <Card>
-        <CardContent>
-          <Typography variant="h6" sx={{ mb: 2, fontWeight: 700 }}>
-            Recent Documents
-          </Typography>
-          <Typography color="text.secondary">Recent processing activity will appear here.</Typography>
-        </CardContent>
-      </Card>
-    </div>
+        <Grid size={{ xs: 12, md: 6 }}>
+          <Card>
+            <CardContent sx={{ p: 3 }}>
+              <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 2 }}>
+                <Description color="secondary" />
+                <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                  Filled forms
+                </Typography>
+              </Stack>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                Upload the completed form to match it with the template and extract values into the system.
+              </Typography>
+              <Button variant="outlined" endIcon={<ArrowForward />}>
+                Upload Filled Form
+              </Button>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
+    </Box>
   )
 }
