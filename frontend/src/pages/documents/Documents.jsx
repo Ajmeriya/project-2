@@ -16,16 +16,21 @@ import {
 } from '@mui/material'
 import { Add, FilePresent, FilterList, Search } from '@mui/icons-material'
 import { Link } from 'react-router-dom'
-
-const documents = [
-  { id: 'DOC-1048', form: 'Bank KYC', customer: 'Aditi Sharma', status: 'Validated', confidence: '96%', time: '08:15 AM' },
-  { id: 'DOC-1049', form: 'Insurance Claim', customer: 'Rahul Mehta', status: 'Needs Review', confidence: '78%', time: '09:42 AM' },
-  { id: 'DOC-1050', form: 'Hospital Intake', customer: 'Sonia Verma', status: 'Processing', confidence: '91%', time: '10:27 AM' },
-  { id: 'DOC-1051', form: 'Government ID', customer: 'Nitin Joshi', status: 'Validated', confidence: '98%', time: '11:05 AM' },
-  { id: 'DOC-1052', form: 'Bank Branch Form', customer: 'Priya Shah', status: 'Queued', confidence: '84%', time: '11:35 AM' },
-]
+import { useEffect, useState } from 'react'
+import { documentApi } from '../../api/documentApi'
 
 export default function DocumentsPage() {
+  const [documents, setDocuments] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    documentApi.list()
+      .then(setDocuments)
+      .catch((requestError) => setError(requestError.message))
+      .finally(() => setIsLoading(false))
+  }, [])
+
   return (
     <Box>
       <Stack direction={{ xs: 'column', md: 'row' }} justifyContent="space-between" alignItems={{ xs: 'flex-start', md: 'center' }} spacing={2} sx={{ mb: 3 }}>
@@ -92,6 +97,8 @@ export default function DocumentsPage() {
 
       <Card>
         <CardContent sx={{ p: 0 }}>
+          {isLoading && <Typography sx={{ p: 3 }} color="text.secondary">Loading documents...</Typography>}
+          {error && <Typography sx={{ p: 3 }} color="error">{error}</Typography>}
           <TableContainer>
             <Table>
               <TableHead>
@@ -104,11 +111,11 @@ export default function DocumentsPage() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {documents.map((document) => (
-                  <TableRow key={document.id} hover>
+                {!isLoading && !error && documents.map((document) => (
+                  <TableRow key={document.id} hover component={Link} to={`/documents/${document.id}`} sx={{ textDecoration: 'none' }}>
                     <TableCell>
                       <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>{document.id}</Typography>
-                      <Typography variant="caption" color="text.secondary">{document.form}</Typography>
+                      <Typography variant="caption" color="text.secondary">{document.formName}</Typography>
                     </TableCell>
                     <TableCell>{document.customer}</TableCell>
                     <TableCell>
@@ -118,10 +125,11 @@ export default function DocumentsPage() {
                         color={document.status === 'Validated' ? 'success' : document.status === 'Needs Review' ? 'warning' : document.status === 'Queued' ? 'info' : 'secondary'}
                       />
                     </TableCell>
-                    <TableCell>{document.confidence}</TableCell>
-                    <TableCell>{document.time}</TableCell>
+                    <TableCell>{document.confidence}%</TableCell>
+                    <TableCell>{new Date(document.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</TableCell>
                   </TableRow>
                 ))}
+                {!isLoading && !error && documents.length === 0 && <TableRow><TableCell colSpan={5}>No documents uploaded yet.</TableCell></TableRow>}
               </TableBody>
             </Table>
           </TableContainer>

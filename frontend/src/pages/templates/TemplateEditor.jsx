@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { useEffect } from 'react'
 import {
   Box,
   Button,
@@ -19,6 +20,8 @@ import {
   Typography,
 } from '@mui/material'
 import { Add, DeleteOutlined, Save, ZoomIn, ZoomOut } from '@mui/icons-material'
+import { useNavigate, useParams } from 'react-router-dom'
+import { templateApi } from '../../api/templateApi'
 
 const initialFields = [
   { id: 1, name: 'Name', type: 'Text', x: 18, y: 14, width: 36, height: 8 },
@@ -31,9 +34,73 @@ const initialFields = [
 const fieldTypes = ['Text', 'Date', 'Phone', 'TextArea', 'Signature', 'Number']
 
 export default function TemplateEditorPage() {
+  const { id } = useParams()
+  const navigate = useNavigate()
+  const [template, setTemplate] = useState(null)
   const [fields, setFields] = useState(initialFields)
   const [selectedFieldId, setSelectedFieldId] = useState(1)
   const [zoom, setZoom] = useState(1)
+  const [isProcessing, setIsProcessing] = useState(false)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    templateApi.get(id)
+      .then((loadedTemplate) => {
+        setTemplate(loadedTemplate)
+        try {
+          const loadedFields = JSON.parse(loadedTemplate.fields || '[]').map((field, index) => ({
+            ...field,
+            id: field.id ?? index + 1,
+          }))
+          if (loadedFields.length) {
+            setFields(loadedFields)
+            setSelectedFieldId(loadedFields[0].id ?? loadedFields[0].name)
+          }
+        } catch {
+          // Keep the editor defaults when an older template has invalid field JSON.
+        }
+      })
+  }, [id])
+
+  const saveTemplate = async () => {
+    if (!template) return
+    setIsProcessing(true)
+    try {
+    const savedTemplate = await templateApi.verify(id, {
+      name: template.name,
+      category: template.category,
+      description: template.description,
+      status: 'Verified',
+      fields: JSON.stringify(fields),
+    })
+    setTemplate(savedTemplate)
+    const readyTemplate = await templateApi.ready(id)
+    setTemplate(readyTemplate)
+    navigate('/templates')
+    } catch (requestError) {
+      setError(requestError.message)
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
+  const detectFields = async () => {
+    setIsProcessing(true)
+    setError('')
+    try {
+      const detected = await templateApi.detect(id)
+      setTemplate(detected)
+      const detectedFields = JSON.parse(detected.fields || '[]').map((field, index) => ({ ...field, id: field.id ?? index + 1 }))
+      if (detectedFields.length) {
+        setFields(detectedFields)
+        setSelectedFieldId(detectedFields[0].id)
+      }
+    } catch (requestError) {
+      setError(requestError.message)
+    } finally {
+      setIsProcessing(false)
+    }
+  }
 
   const selectedField = useMemo(
     () => fields.find((field) => field.id === selectedFieldId) ?? fields[0],
@@ -79,11 +146,14 @@ export default function TemplateEditorPage() {
             Template Editor
           </Typography>
           <Typography variant="h4" sx={{ fontWeight: 800 }}>
-            Bank KYC Template
+            {template?.name || 'Template Editor'}
           </Typography>
         </Box>
 
         <Stack direction="row" spacing={1.5}>
+          <Button variant="outlined" onClick={detectFields} disabled={!template || isProcessing}>
+            {isProcessing ? 'Processing...' : 'Run AI Detection'}
+          </Button>
           <IconButton onClick={() => setZoom((prev) => Math.max(0.75, Number((prev - 0.1).toFixed(2))))}>
             <ZoomOut />
           </IconButton>
@@ -91,11 +161,12 @@ export default function TemplateEditorPage() {
           <IconButton onClick={() => setZoom((prev) => Math.min(1.5, Number((prev + 0.1).toFixed(2))))}>
             <ZoomIn />
           </IconButton>
-          <Button variant="contained" startIcon={<Save />}>
+          <Button variant="contained" startIcon={<Save />} onClick={saveTemplate} disabled={!template || isProcessing}>
             Save Template
           </Button>
         </Stack>
       </Stack>
+      {error && <Typography color="error" sx={{ mb: 2 }}>{error}</Typography>}
 
       <Grid container spacing={3}>
         <Grid size={{ xs: 12, lg: 8 }}>

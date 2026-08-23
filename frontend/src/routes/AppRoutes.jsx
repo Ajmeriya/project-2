@@ -11,6 +11,7 @@ import DocumentsPage from '../pages/documents/Documents'
 import UploadDocumentPage from '../pages/documents/UploadDocument'
 import ReviewPage from '../pages/review/Review'
 import SettingsPage from '../pages/settings/Settings'
+import DocumentDetailsPage from '../pages/documents/DocumentDetails'
 import ProtectedRoute from './ProtectedRoute'
 
 function NotFoundPage() {
@@ -37,6 +38,7 @@ export default function AppRoutes() {
           <Route path="/templates/new" element={<CreateTemplatePage />} />
           <Route path="/templates/:id/edit" element={<TemplateEditorPage />} />
           <Route path="/documents" element={<DocumentsPage />} />
+          <Route path="/documents/:id" element={<DocumentDetailsPage />} />
           <Route path="/documents/upload" element={<UploadDocumentPage />} />
           <Route path="/review/:id" element={<ReviewPage />} />
           <Route path="/settings" element={<SettingsPage />} />

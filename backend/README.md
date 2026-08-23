@@ -12,6 +12,34 @@ Authentication endpoints:
 Both endpoints return a JWT in the `token` field. Send it on protected requests as
 `Authorization: Bearer <token>`.
 
+Authenticated template endpoints:
+
+- `GET /api/templates`
+- `GET /api/templates/{id}`
+- `POST /api/templates`
+- `PUT /api/templates/{id}`
+- `DELETE /api/templates/{id}`
+- `POST /api/templates/{id}/detect`
+- `PUT /api/templates/{id}/verify`
+- `POST /api/templates/{id}/ready`
+- `GET /api/templates/{id}/file`
+
+Template creation uses multipart form data with `metadata` JSON and `file`; the empty form is stored in MySQL. Template `fields` are stored as a JSON string using the editor field shape.
+
+Authenticated document endpoints:
+
+- `GET /api/documents`
+- `GET /api/documents/{id}`
+- `POST /api/documents` as multipart form data with `metadata` JSON and `file`
+- `DELETE /api/documents/{id}`
+- `GET /api/documents/{id}/file`
+- `POST /api/documents/{id}/align`
+- `POST /api/documents/{id}/extract`
+- `POST /api/documents/{id}/verify`
+- `POST /api/documents/{id}/finalize`
+
+Uploads store document metadata and file bytes in MySQL. OCR is not included yet.
+
 ## Requirements
 
 - Java 17 or newer

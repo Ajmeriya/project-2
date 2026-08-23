@@ -10,15 +10,31 @@ import {
 } from '@mui/material'
 import { Add, ArrowForward, Description, Edit, UploadFile } from '@mui/icons-material'
 import { Link } from 'react-router-dom'
-
-const templates = [
-  { id: 1, name: 'Bank KYC Form', version: 'v3.2', fields: 18, status: 'Active', updated: '2 hours ago' },
-  { id: 2, name: 'Insurance Claim', version: 'v1.8', fields: 24, status: 'Draft', updated: '1 day ago' },
-  { id: 3, name: 'Healthcare Intake', version: 'v2.1', fields: 32, status: 'Active', updated: '3 days ago' },
-  { id: 4, name: 'Government ID Annexure', version: 'v4.0', fields: 14, status: 'Review', updated: '5 days ago' },
-]
+import { useEffect, useState } from 'react'
+import { templateApi } from '../../api/templateApi'
 
 export default function TemplatesPage() {
+  const [templates, setTemplates] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    templateApi.list()
+      .then(setTemplates)
+      .catch((requestError) => setError(requestError.message))
+      .finally(() => setIsLoading(false))
+  }, [])
+
+  const fieldCount = (template) => {
+    try {
+      return JSON.parse(template.fields || '[]').length
+    } catch {
+      return 0
+    }
+  }
+
+  const updatedLabel = (updatedAt) => updatedAt ? new Date(updatedAt).toLocaleDateString() : 'recently'
+
   return (
     <Box>
       <Stack direction={{ xs: 'column', md: 'row' }} justifyContent="space-between" alignItems={{ xs: 'flex-start', md: 'center' }} spacing={2} sx={{ mb: 3 }}>
@@ -35,6 +51,10 @@ export default function TemplatesPage() {
           Create Template
         </Button>
       </Stack>
+
+      {isLoading && <Typography color="text.secondary">Loading templates...</Typography>}
+      {error && <Typography color="error" sx={{ mb: 2 }}>{error}</Typography>}
+      {!isLoading && !error && templates.length === 0 && <Typography color="text.secondary">No templates yet. Create your first template.</Typography>}
 
       <Grid container spacing={3}>
         {templates.map((template) => (
@@ -64,10 +84,10 @@ export default function TemplatesPage() {
 
                 <Stack spacing={1.5} sx={{ mb: 2.5 }}>
                   <Typography variant="body2" color="text.secondary">
-                    {template.fields} mapped fields
+                    {fieldCount(template)} mapped fields
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Last updated {template.updated}
+                    Last updated {updatedLabel(template.updatedAt)}
                   </Typography>
                 </Stack>
 
