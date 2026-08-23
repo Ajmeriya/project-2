@@ -25,6 +25,7 @@ import {
 } from '@mui/icons-material'
 import { useMemo, useState } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
+import useAuth from '../../hooks/useAuth'
 
 const navItems = [
   { label: 'Templates', to: '/templates', icon: Folder },
@@ -33,6 +34,8 @@ const navItems = [
 ]
 
 function SidebarContent({ onClose }) {
+  const { logout } = useAuth()
+
   return (
     <Box
       sx={{
@@ -114,6 +117,7 @@ function SidebarContent({ onClose }) {
           fullWidth
           variant="outlined"
           startIcon={<Logout />}
+          onClick={logout}
           sx={{ justifyContent: 'flex-start', borderRadius: 2 }}
         >
           Logout

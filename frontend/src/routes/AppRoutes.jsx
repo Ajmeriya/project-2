@@ -11,6 +11,7 @@ import DocumentsPage from '../pages/documents/Documents'
 import UploadDocumentPage from '../pages/documents/UploadDocument'
 import ReviewPage from '../pages/review/Review'
 import SettingsPage from '../pages/settings/Settings'
+import ProtectedRoute from './ProtectedRoute'
 
 function NotFoundPage() {
   return (
@@ -29,7 +30,8 @@ export default function AppRoutes() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
 
-        <Route element={<AppLayout />}>
+        <Route element={<ProtectedRoute />}>
+          <Route element={<AppLayout />}>
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/templates" element={<TemplatesPage />} />
           <Route path="/templates/new" element={<CreateTemplatePage />} />
@@ -38,6 +40,7 @@ export default function AppRoutes() {
           <Route path="/documents/upload" element={<UploadDocumentPage />} />
           <Route path="/review/:id" element={<ReviewPage />} />
           <Route path="/settings" element={<SettingsPage />} />
+          </Route>
         </Route>
 
         <Route path="*" element={<NotFoundPage />} />
